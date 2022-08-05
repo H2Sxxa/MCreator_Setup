@@ -112,6 +112,8 @@ with open("DownloadList.txt","w",encoding="utf-8") as DownloadList:
         if Utils.make_choice():
             task_setup_dnf=True
             DownloadList.write(Utils.getDownloadUri("dnf")+"\n")
+    else:
+        task_setup_dnf=False
 Utils.Download()
 if use_mcr:
     Logger.info(r"请手动选择C:\Users\<你的用户名>\.mcreator\gradle\jdks目录")
@@ -125,7 +127,7 @@ if use_mcr:
     if usejdk == 17:
         rename("OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip","adoptopenjdk-17-x64-windows.zip")
         move("adoptopenjdk-17-x64-windows.zip",askdirectory())
-
+        
 if task_setup_dnf:
     system(r".\ndp48-x86-x64-allos-enu.exe")
 
