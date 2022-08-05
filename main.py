@@ -114,7 +114,7 @@ with open("DownloadList.txt","w",encoding="utf-8") as DownloadList:
             DownloadList.write(Utils.getDownloadUri("dnf")+"\n")
 Utils.Download()
 if use_mcr:
-    Logger.info("请手动选择C:\Users\<你的用户名>\.mcreator\gradle\jdks目录")
+    Logger.info(r"请手动选择C:\Users\<你的用户名>\.mcreator\gradle\jdks目录")
     Logger.info("没有这个目录手动创建,有此目录建议清空")
     if usejdk == 8:
         rename("OpenJDK8U-jdk_x64_windows_hotspot_8u312b07.zip","adoptopenjdk-8-x64-windows.zip")
