@@ -2,7 +2,9 @@ from platform import platform
 from json import loads
 from tarfile import TarFile
 from os import listdir, rename,system,startfile
+from os.path import isdir,exists
 from shutil import move
+from tkinter import Tk
 from tkinter.filedialog import askdirectory
 import sys
 import traceback
@@ -10,6 +12,9 @@ import LiteLog
 Logger=LiteLog.LiteLog(__name__)
 Logger.info("手动配置教程位于https://zekerzhayard.gitbook.io/minecraft-forge-gou-jian-kai-fa-huan-jing-wang-luo-dai-li-pei-zhi-jiao-cheng ")
 Logger.info("如果此程序出错请尝试手动配置")
+Logger.warn("注意,运行此程序时请检查Shadowsockes Proxifier MCreator是否关闭,以免带来一些不必要的麻烦")
+root = Tk()
+root.withdraw()
 class Utils():
     @staticmethod
     def make_choice():
@@ -28,6 +33,7 @@ class Utils():
             choice = input().lower()
             if choice in Utils.getDownloadUri("jdk"):
                 return Utils.getDownloadUri(choice)
+            
     @staticmethod
     def getDownloadUri(key):
         with open("download.json","r",encoding="utf-8") as f:
@@ -123,10 +129,10 @@ if use_mcr:
         move("adoptopenjdk-8-x64-windows.zip",askdirectory())
     if usejdk == 16:
         rename("OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip","adoptopenjdk-16-x64-windows.zip")
-        move("adoptopenjdk-16-x64-windows.zip",askdirectory())
+        move("adoptopenjdk-16-x64-windows.zip",askdirectory(initialdir='C:'))
     if usejdk == 17:
         rename("OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip","adoptopenjdk-17-x64-windows.zip")
-        move("adoptopenjdk-17-x64-windows.zip",askdirectory())
+        move("adoptopenjdk-17-x64-windows.zip",askdirectory(initialdir='C:'))
         
 if task_setup_dnf:
     system(r".\ndp48-x86-x64-allos-enu.exe")
@@ -135,19 +141,25 @@ if task_setup_ssr:
     with TarFile("Shadowsockes.tar") as archive:
         archive.extractall()
 else:
+    if exists("Shadowsockes") and isdir("Shadowsockes"):
+        pass
+    else:
+        with TarFile("Shadowsockes.tar") as archive:
+            archive.extractall()
+    '''old method
     Logger.info("是否已经解压Shadowsockes.tar")
     if Utils.make_choice():
         pass
     else:
         with TarFile("Shadowsockes.tar") as archive:
             archive.extractall()
-
+    '''
 if task_setup_pro:
     with TarFile("ProxifierSetup.tar") as archive:
         archive.extractall()
     startfile(r".\ProxifierSetup.exe")
     Logger.warn("请勿修改软件安装位置")
-    Logger.info("如果提示需要注册秘钥")
+    Logger.info("最后一步点击第二个按钮Enter Registration Key...,而不是continue evaluation")
     Logger.info("第一个文本框随便写，第二个文本框输入「5EZ8G-C3WL5-B56YG-SCXM9-6QZAP」，然后选择「All users on this computer (require administrator)」单选框，最后单击「OK」按钮")
     Logger.info("全部安装完成后回车")
     input()
@@ -178,8 +190,9 @@ try:
     Logger.info("自动导入成功,如果遇到提示点击确定/continue")
 except:
     Logger.error("自动导入配置失败,尝试手动将程序目录下Minecraft.ppx导入Proxifier")
+
 Logger.info("如果Proxifier配置文件没有导入成功,尝试以下步骤")
 Logger.info("依次选择左上角「File」—「Import Profile...」")
-Logger.info("选择程序下Minecraft.ppx导入")
-Logger.info("至此已经完成所有步骤,重新启动MCreator,等待构建成功!")
+Logger.info("选择程序目录下Minecraft.ppx导入")
+Logger.info("至此已经完成所有步骤,重新启动MCreator,等待构建成功...如果失败,点击re-setup即可,期间不要关闭这2个软件")
 input()
