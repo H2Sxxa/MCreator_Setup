@@ -1,2 +1,2 @@
 # MCreator_Setup
-A fast tool for chain user(not offical)
+A fast tool for special user(not offical)

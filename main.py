@@ -1,25 +1,38 @@
 from platform import platform
 from json import loads
 from tarfile import TarFile
-from os import listdir,system,startfile
+from os import listdir, rename,system,startfile
+from shutil import move
+from tkinter.filedialog import askdirectory
 import sys
 import traceback
 import LiteLog
 Logger=LiteLog.LiteLog(__name__)
+Logger.info("手动配置教程位于https://zekerzhayard.gitbook.io/minecraft-forge-gou-jian-kai-fa-huan-jing-wang-luo-dai-li-pei-zhi-jiao-cheng ")
+Logger.info("如果此程序出错请尝试手动配置")
 class Utils():
     @staticmethod
     def make_choice():
         while True:
             Logger.info("是否确定(Y/N)")
-            choice=input()
+            choice=input().upper()
             if choice == "Y":
                 return True
             if choice == "N":
                 return False
     @staticmethod
+    def chose_jdk():
+        while True:
+            Logger.info("从中选择一个JDK版本")
+            Logger.info(Utils.getDownloadUri("jdk"))
+            choice = input().lower()
+            if choice in Utils.getDownloadUri("jdk"):
+                return Utils.getDownloadUri(choice)
+    @staticmethod
     def getDownloadUri(key):
         with open("download.json","r",encoding="utf-8") as f:
             return loads(f.read())[key]
+
     @staticmethod
     def Download():
         system(r".\aria2c.exe -x16 -s4 -iDownloadList.txt")
@@ -60,9 +73,32 @@ class PlatformCheck():
             return False
 ErrorHooker()
 with open("DownloadList.txt","w",encoding="utf-8") as DownloadList:
+    Logger.info("您是否为MCreator用户")
     LocationFile=listdir()
     task_setup_pro=False
     task_setup_ssr=False
+    use_mcr=False
+    if Utils.make_choice():
+        use_mcr=True
+        Logger.info("选择jdk版本")
+        Logger.info("jdk8 适用于 Minecraft 1.16.5 或更旧版本")
+        Logger.info("jdk16 适用于 Minecraft 1.17.x")
+        Logger.info("jdk17 适用于 Minecraft 1.18 或更新版本")
+        Ijdk=Utils.chose_jdk()
+        if Ijdk == Utils.getDownloadUri("jdk8"):
+            usejdk=8
+            if "OpenJDK8U-jdk_x64_windows_hotspot_8u312b07.zip" not in LocationFile:
+                DownloadList.write(Ijdk+"\n")
+                
+        if Ijdk == Utils.getDownloadUri("jdk16"):
+            usejdk=16
+            if "OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip" not in LocationFile:
+                DownloadList.write(Ijdk+"\n")
+                
+        if Ijdk == Utils.getDownloadUri("jdk17"):
+            usejdk=17
+            if "OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip" not in LocationFile:
+                DownloadList.write(Ijdk+"\n")
     if "ProxifierSetup.tar" not in LocationFile:
         task_setup_pro=True
         DownloadList.write(Utils.getDownloadUri("proxifier")+"\n")
@@ -77,6 +113,18 @@ with open("DownloadList.txt","w",encoding="utf-8") as DownloadList:
             task_setup_dnf=True
             DownloadList.write(Utils.getDownloadUri("dnf")+"\n")
 Utils.Download()
+if use_mcr:
+    Logger.info("请手动选择C:\Users\<你的用户名>\.mcreator\gradle\jdks目录")
+    Logger.info("没有这个目录手动创建,有此目录建议清空")
+    if usejdk == 8:
+        rename("OpenJDK8U-jdk_x64_windows_hotspot_8u312b07.zip","adoptopenjdk-8-x64-windows.zip")
+        move("adoptopenjdk-8-x64-windows.zip",askdirectory())
+    if usejdk == 16:
+        rename("OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip","adoptopenjdk-16-x64-windows.zip")
+        move("adoptopenjdk-16-x64-windows.zip",askdirectory())
+    if usejdk == 17:
+        rename("OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip","adoptopenjdk-17-x64-windows.zip")
+        move("adoptopenjdk-17-x64-windows.zip",askdirectory())
 
 if task_setup_dnf:
     system(r".\ndp48-x86-x64-allos-enu.exe")
@@ -123,6 +171,13 @@ try:
     startfile(r".\Shadowsockes\Shadowsocks.exe")
 except:
     Logger.error("自动启动Shadowsocks失败,尝试手动启动Shadowsocks")
-Logger.info("确认2个软件启动并且MCreator关闭后回车")
+try:
+    startfile(r".\Minecraft.ppx")
+    Logger.info("自动导入成功,如果遇到提示点击确定/continue")
+except:
+    Logger.error("自动导入配置失败,尝试手动将程序目录下Minecraft.ppx导入Proxifier")
+Logger.info("如果Proxifier配置文件没有导入成功,尝试以下步骤")
+Logger.info("依次选择左上角「File」—「Import Profile...」")
+Logger.info("选择程序下Minecraft.ppx导入")
+Logger.info("至此已经完成所有步骤,重新启动MCreator,等待构建成功!")
 input()
-Logger.info("")
