@@ -63,7 +63,7 @@ with open("DownloadList.txt","w",encoding="utf-8") as DownloadList:
     LocationFile=listdir()
     task_setup_pro=False
     task_setup_ssr=False
-    if "Proxifier.tar" not in LocationFile:
+    if "ProxifierSetup.tar" not in LocationFile:
         task_setup_pro=True
         DownloadList.write(Utils.getDownloadUri("proxifier")+"\n")
     if "Shadowsockes.tar" not in LocationFile:
@@ -76,15 +76,33 @@ with open("DownloadList.txt","w",encoding="utf-8") as DownloadList:
         if Utils.make_choice():
             task_setup_dnf=True
             DownloadList.write(Utils.getDownloadUri("dnf")+"\n")
-
 Utils.Download()
+
 if task_setup_dnf:
     system(r".\ndp48-x86-x64-allos-enu.exe")
 
-if task_setup_pro:
-    with TarFile("Proxifier.tar") as archive:
-        archive.extractall()
-        
 if task_setup_ssr:
     with TarFile("Shadowsockes.tar") as archive:
         archive.extractall()
+
+if task_setup_pro:
+    with TarFile("ProxifierSetup.tar") as archive:
+        archive.extractall()
+    system("")
+    Logger.info("全部安装完成后回车")
+    input()
+else:
+    Logger.info("是否已经安装Proxifier")
+    if Utils.make_choice():
+        pass
+    else:
+        with TarFile("ProxifierSetup.tar") as archive:
+            archive.extractall()
+        system(r".\ProxifierSetup.exe")
+        Logger.info("全部安装完成后回车")
+        input()
+        
+try:
+    system("\"C:\Program Files (x86)\Proxifier\Proxifier.exe\"")
+except:
+    Logger.error("自动启动Proxifier失败,尝试手动启动Proxifier")
