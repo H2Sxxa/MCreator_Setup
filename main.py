@@ -1,7 +1,7 @@
 from platform import platform
 from json import loads
 from tarfile import TarFile
-from os import listdir,system
+from os import listdir,system,startfile
 import sys
 import traceback
 import LiteLog
@@ -84,11 +84,21 @@ if task_setup_dnf:
 if task_setup_ssr:
     with TarFile("Shadowsockes.tar") as archive:
         archive.extractall()
+else:
+    Logger.info("是否已经解压Shadowsockes.tar")
+    if Utils.make_choice():
+        pass
+    else:
+        with TarFile("Shadowsockes.tar") as archive:
+            archive.extractall()
 
 if task_setup_pro:
     with TarFile("ProxifierSetup.tar") as archive:
         archive.extractall()
-    system("")
+    startfile(r".\ProxifierSetup.exe")
+    Logger.warn("请勿修改软件安装位置")
+    Logger.info("如果提示需要注册秘钥")
+    Logger.info("第一个文本框随便写，第二个文本框输入「5EZ8G-C3WL5-B56YG-SCXM9-6QZAP」，然后选择「All users on this computer (require administrator)」单选框，最后单击「OK」按钮")
     Logger.info("全部安装完成后回车")
     input()
 else:
@@ -98,11 +108,21 @@ else:
     else:
         with TarFile("ProxifierSetup.tar") as archive:
             archive.extractall()
-        system(r".\ProxifierSetup.exe")
+        startfile(r".\ProxifierSetup.exe")
+        Logger.warn("请勿修改软件安装位置")
+        Logger.info("如果提示需要注册秘钥")
+        Logger.info("第一个文本框随便写，第二个文本框输入「5EZ8G-C3WL5-B56YG-SCXM9-6QZAP」，然后选择「All users on this computer (require administrator)」单选框，最后单击「OK」按钮")
         Logger.info("全部安装完成后回车")
         input()
-        
 try:
-    system("\"C:\Program Files (x86)\Proxifier\Proxifier.exe\"")
+    startfile("\"C:\Program Files (x86)\Proxifier\Proxifier.exe\"")
 except:
     Logger.error("自动启动Proxifier失败,尝试手动启动Proxifier")
+
+try:
+    startfile(r".\Shadowsockes\Shadowsocks.exe")
+except:
+    Logger.error("自动启动Shadowsocks失败,尝试手动启动Shadowsocks")
+Logger.info("确认2个软件启动并且MCreator关闭后回车")
+input()
+Logger.info("")
