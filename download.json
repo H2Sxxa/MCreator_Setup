@@ -5,5 +5,7 @@
     "jdk17":"https://ghproxy.com/https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip",
     "dnf":"https://download.visualstudio.microsoft.com/download/pr/2d6bb6b2-226a-4baa-bdec-798822606ff1/8494001c276a4b96804cde7829c04d7f/ndp48-x86-x64-allos-enu.exe",
     "shadowsocketes":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/Shadowsockes.tar",
-    "proxifier":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/ProxifierSetup.tar"
+    "proxifier":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/ProxifierSetup.tar",
+    "github_mcrapi":"https://api.github.com/repos/MCreator/MCreator/releases",
+    "github_proxy":"https://ghproxy.com/"
 }

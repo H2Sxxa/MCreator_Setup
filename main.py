@@ -1,21 +1,55 @@
 from platform import platform
-from json import loads
+from json import loads,dumps
 from tarfile import TarFile
-from os import listdir, rename,system,startfile
+from os import getcwd, listdir, rename,system,startfile
 from os.path import isdir,exists
 from shutil import move
 from tkinter import Tk
 from tkinter.filedialog import askdirectory
+from requests import get
+from requests import packages
 import sys
 import traceback
 import LiteLog
+from colorama import Fore,Style
 Logger=LiteLog.LiteLog(__name__)
 Logger.info("手动配置教程位于https://zekerzhayard.gitbook.io/minecraft-forge-gou-jian-kai-fa-huan-jing-wang-luo-dai-li-pei-zhi-jiao-cheng ")
 Logger.info("如果此程序出错请尝试手动配置")
 Logger.warn("注意,运行此程序时请检查Shadowsockes Proxifier MCreator是否关闭,以免带来一些不必要的麻烦")
 root = Tk()
 root.withdraw()
+
 class Utils():
+    @staticmethod
+    def get_release():
+        packages.urllib3.disable_warnings()
+        Logger.warn("连接api.github.com可能会出错如果遇到错误可稍后访问,也可以自行下载")
+        Logger.info("snp代表快照(snapshot)版本,stb代表稳定(stable)版本")
+        try:
+            stable=[]
+            snapshot=[]
+            choicelist={}
+            choice=""
+            for i in map(Utils.extractsort,loads(get(Utils.getUri("github_mcrapi")+"/latest",verify=False).text)["assets"]):
+                stable.append(i)
+            for i in map(Utils.extractsort,loads(get(Utils.getUri("github_mcrapi"),verify=False).text)[0]["assets"]):
+                snapshot.append(i)
+            for i,j in zip(stable,range(len(stable))):
+                print(Fore.LIGHTRED_EX+"stb%s"%j+" "+Fore.LIGHTGREEN_EX+i["name"]+Style.RESET_ALL)
+                choicelist.update({"stb%s"%j:i["download"]})
+            for i,j in zip(snapshot,range(len(snapshot))):
+                print(Fore.LIGHTRED_EX+"snp%s"%j+" "+Fore.LIGHTGREEN_EX+i["name"]+Style.RESET_ALL)
+                choicelist.update({"snp%s"%j:i["download"]})
+            while choice not in choicelist:
+                Logger.info("选择你需要的版本,然后输入前面的序号,例如stb1")
+                choice=input()
+            return Utils.getUri("github_proxy")+choicelist[choice]
+        except Exception as e:
+            Logger.error(e)
+            return ""
+    @staticmethod
+    def extractsort(jsonf:dict):
+        return {"name":jsonf["name"],"download":jsonf["browser_download_url"]}
     @staticmethod
     def make_choice():
         while True:
@@ -29,13 +63,13 @@ class Utils():
     def chose_jdk():
         while True:
             Logger.info("从中选择一个JDK版本")
-            Logger.info(Utils.getDownloadUri("jdk"))
+            Logger.info(Utils.getUri("jdk"))
             choice = input().lower()
-            if choice in Utils.getDownloadUri("jdk"):
-                return Utils.getDownloadUri(choice)
+            if choice in Utils.getUri("jdk"):
+                return Utils.getUri(choice)
             
     @staticmethod
-    def getDownloadUri(key):
+    def getUri(key):
         with open("download.json","r",encoding="utf-8") as f:
             return loads(f.read())[key]
 
@@ -70,10 +104,11 @@ class PlatformCheck():
     def need_netframework(self):
         if self.version == "7":
             Logger.info("win7需要下载 .NET Framework 4.8 否则Shadowsock无法运行")
+            Logger.info("您可以先自查有无 .NET Framework 4.8")
             return True
         elif self.version == "10":
             Logger.warn("低于Windows 10 1903需要下载 .NET Framework 4.8 否则Shadowsock无法运行")
-            Logger.warn("如果无法使用,自行下载安装 %s"% Utils.getDownloadUri("dnf"))
+            Logger.warn("如果无法使用,自行下载安装 %s"% Utils.getUri("dnf"))
             return False
         else:
             return False
@@ -91,33 +126,38 @@ with open("DownloadList.txt","w",encoding="utf-8") as DownloadList:
         Logger.info("jdk16 适用于 Minecraft 1.17.x")
         Logger.info("jdk17 适用于 Minecraft 1.18 或更新版本")
         Ijdk=Utils.chose_jdk()
-        if Ijdk == Utils.getDownloadUri("jdk8"):
+        if Ijdk == Utils.getUri("jdk8"):
             usejdk=8
             if "OpenJDK8U-jdk_x64_windows_hotspot_8u312b07.zip" not in LocationFile:
                 DownloadList.write(Ijdk+"\n")
                 
-        if Ijdk == Utils.getDownloadUri("jdk16"):
+        if Ijdk == Utils.getUri("jdk16"):
             usejdk=16
             if "OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip" not in LocationFile:
                 DownloadList.write(Ijdk+"\n")
                 
-        if Ijdk == Utils.getDownloadUri("jdk17"):
+        if Ijdk == Utils.getUri("jdk17"):
             usejdk=17
             if "OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip" not in LocationFile:
                 DownloadList.write(Ijdk+"\n")
+                
+        Logger.info("是否需要同时下载MCreator")
+        if Utils.make_choice():
+            DownloadList.write(Utils.get_release()+"\n")
+            Logger.info("MCreator下载后会存放到%s,请自行安装" % getcwd())
     if "ProxifierSetup.tar" not in LocationFile:
         task_setup_pro=True
-        DownloadList.write(Utils.getDownloadUri("proxifier")+"\n")
+        DownloadList.write(Utils.getUri("proxifier")+"\n")
     if "Shadowsockes.tar" not in LocationFile:
         task_setup_ssr=True
-        DownloadList.write(Utils.getDownloadUri("shadowsocketes")+"\n")
+        DownloadList.write(Utils.getUri("shadowsocketes")+"\n")
     Platformck=PlatformCheck()
     if Platformck.need_netframework():
         task_setup_dnf=False
         Logger.info("下载 .NET Framework 4.8")
         if Utils.make_choice():
             task_setup_dnf=True
-            DownloadList.write(Utils.getDownloadUri("dnf")+"\n")
+            DownloadList.write(Utils.getUri("dnf")+"\n")
     else:
         task_setup_dnf=False
 Utils.Download()
