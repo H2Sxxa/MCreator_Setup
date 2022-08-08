@@ -9,14 +9,8 @@ A fast tool for special user(not offical)
 使用的软件均来自互联网
 
 # 鸣谢
-https://zekerzhayard.gitbook.io/minecraft-forge-gou-jian-kai-fa-huan-jing-wang-luo-dai-li-pei-zhi-jiao-cheng
+https://zekerzhayard.gitbook.io/minecraft-forge-gou-jian-kai-fa-huan-jing-wang-luo-dai-li-pei-zhi-jiao-cheng 提供的基础实现步骤思路
 
-提供的基础
+https://github.com/aria2 提供了软件下载功能
 
-https://github.com/aria2
-
-提供了aria2下载软件
-
-https://ghproxy.com
-
-提供了代理地址
+https://ghproxy.com 提供了代理地址

@@ -1,5 +1,5 @@
 from platform import platform
-from json import loads,dumps
+from json import loads
 from tarfile import TarFile
 from os import getcwd, listdir, rename,system,startfile
 from os.path import isdir,exists
@@ -15,7 +15,8 @@ from colorama import Fore,Style
 Logger=LiteLog.LiteLog(__name__)
 Logger.info("手动配置教程位于https://zekerzhayard.gitbook.io/minecraft-forge-gou-jian-kai-fa-huan-jing-wang-luo-dai-li-pei-zhi-jiao-cheng ")
 Logger.info("如果此程序出错请尝试手动配置")
-Logger.warn("注意,运行此程序时请检查Shadowsockes Proxifier MCreator是否关闭,以免带来一些不必要的麻烦")
+Logger.info("如果你不知道干什么请优先观看控制台出现的日志,而不是前往提问")
+Logger.warn("注意,运行此程序时请检查Shadowsockes,Proxifier以及MCreator是否关闭,以免带来一些不必要的麻烦")
 root = Tk()
 root.withdraw()
 
@@ -42,6 +43,7 @@ class Utils():
                 choicelist.update({"snp%s"%j:i["download"]})
             while choice not in choicelist:
                 Logger.info("选择你需要的版本,然后输入前面的序号,例如stb1")
+                Logger.info("如果你不知道下载哪个,请选择.exe结尾的版本")
                 choice=input()
             return Utils.getUri("github_proxy")+choicelist[choice]
         except Exception as e:
@@ -88,6 +90,8 @@ class ErrorHooker:
         Logger.error(exc_value)
         Logger.error("Exception location\n"+"".join(traceback.format_exception(exc_type, exc_value, exc_traceback_obj)))
         Logger.writeAllLog("crashreport.log")
+        Logger.error("错误日志已保存到crashreport.log")
+        Logger.info("如果你看不懂这个崩溃报告可以前往 https://github.com/IAXRetailer/MCreator_Setup/issues 点击「New issue」")
         input()
         exit()
 
@@ -105,16 +109,18 @@ class PlatformCheck():
         if self.version == "7":
             Logger.info("win7需要下载 .NET Framework 4.8 否则Shadowsock无法运行")
             Logger.info("您可以先自查有无 .NET Framework 4.8")
+            Logger.info("有或者之前下好ndp48-x86-x64-allos-enu.exe且在本目录可以选择N跳过此步")
             return True
         elif self.version == "10":
-            Logger.warn("低于Windows 10 1903需要下载 .NET Framework 4.8 否则Shadowsock无法运行")
-            Logger.warn("如果无法使用,自行下载安装 %s"% Utils.getUri("dnf"))
+            Logger.warn("系统低于 Windows 10 1903 需要下载 .NET Framework 4.8 否则Shadowsock无法运行")
+            Logger.warn("此步在win10默认跳过,如果无法使用,自行下载安装 %s"% Utils.getUri("dnf"))
             return False
         else:
             return False
 ErrorHooker()
 with open("DownloadList.txt","w",encoding="utf-8") as DownloadList:
     Logger.info("您是否为MCreator用户")
+    Logger.info("如果已经下好JDK并且下好MCreator可以输入N跳过此步")
     LocationFile=listdir()
     task_setup_pro=False
     task_setup_ssr=False
@@ -142,6 +148,7 @@ with open("DownloadList.txt","w",encoding="utf-8") as DownloadList:
                 DownloadList.write(Ijdk+"\n")
                 
         Logger.info("是否需要同时下载MCreator")
+        Logger.info("已安装或者下载好了可以输入N跳过此步")
         if Utils.make_choice():
             DownloadList.write(Utils.get_release()+"\n")
             Logger.info("MCreator下载后会存放到%s,请自行安装" % getcwd())
@@ -164,6 +171,7 @@ Utils.Download()
 if use_mcr:
     Logger.info(r"请手动选择C:\Users\<你的用户名>\.mcreator\gradle\jdks目录")
     Logger.info("没有这个目录手动创建,有此目录建议清空")
+    Logger.info("如果仅需安装JDK请在此步结束后直接关闭程序")
     if usejdk == 8:
         rename("OpenJDK8U-jdk_x64_windows_hotspot_8u312b07.zip","adoptopenjdk-8-x64-windows.zip")
         move("adoptopenjdk-8-x64-windows.zip",askdirectory())
@@ -175,7 +183,9 @@ if use_mcr:
         move("adoptopenjdk-17-x64-windows.zip",askdirectory(initialdir='C:'))
         
 if task_setup_dnf:
-    system(r".\ndp48-x86-x64-allos-enu.exe")
+    startfile(r".\ndp48-x86-x64-allos-enu.exe")
+    Logger.info("安装成功后如需重启,请重启并在安装.NET4.8选择N跳过以免重复安装")
+    input()
 
 if task_setup_ssr:
     with TarFile("Shadowsockes.tar") as archive:
@@ -186,7 +196,7 @@ else:
     else:
         with TarFile("Shadowsockes.tar") as archive:
             archive.extractall()
-    '''old method
+    '''@Deprecated
     Logger.info("是否已经解压Shadowsockes.tar")
     if Utils.make_choice():
         pass
@@ -200,11 +210,13 @@ if task_setup_pro:
     startfile(r".\ProxifierSetup.exe")
     Logger.warn("请勿修改软件安装位置")
     Logger.info("最后一步点击第二个按钮Enter Registration Key...,而不是continue evaluation")
-    Logger.info("第一个文本框随便写，第二个文本框输入「5EZ8G-C3WL5-B56YG-SCXM9-6QZAP」，然后选择「All users on this computer (require administrator)」单选框，最后单击「OK」按钮")
+    Logger.info("第一个文本框随便写,第二个文本框输入「5EZ8G-C3WL5-B56YG-SCXM9-6QZAP」,然后选择「All users on this computer (require administrator)」单选框,最后单击「OK」按钮")
     Logger.info("全部安装完成后回车")
     input()
 else:
     Logger.info("是否已经安装Proxifier")
+    Logger.info("如果你不知道这是什么请输入N来安装Proxifier")
+    Logger.info("如果已经安装输入Y跳过此步")
     if Utils.make_choice():
         pass
     else:
@@ -213,7 +225,7 @@ else:
         startfile(r".\ProxifierSetup.exe")
         Logger.warn("请勿修改软件安装位置")
         Logger.info("如果提示需要注册秘钥")
-        Logger.info("第一个文本框随便写，第二个文本框输入「5EZ8G-C3WL5-B56YG-SCXM9-6QZAP」，然后选择「All users on this computer (require administrator)」单选框，最后单击「OK」按钮")
+        Logger.info("第一个文本框随便写,第二个文本框输入「5EZ8G-C3WL5-B56YG-SCXM9-6QZAP」,然后选择「All users on this computer (require administrator)」单选框,最后单击「OK」按钮")
         Logger.info("全部安装完成后回车")
         input()
 try:
@@ -227,12 +239,12 @@ except:
     Logger.error("自动启动Shadowsocks失败,尝试手动启动Shadowsocks")
 try:
     startfile(r".\Minecraft.ppx")
-    Logger.info("自动导入成功,如果遇到提示点击确定/continue")
+    Logger.info("自动导入成功,如果遇到提示点击确定即可")
 except:
     Logger.error("自动导入配置失败,尝试手动将程序目录下Minecraft.ppx导入Proxifier")
 
 Logger.info("如果Proxifier配置文件没有导入成功,尝试以下步骤")
 Logger.info("依次选择左上角「File」—「Import Profile...」")
 Logger.info("选择程序目录下Minecraft.ppx导入")
-Logger.info("至此已经完成所有步骤,重新启动MCreator,等待构建成功...如果失败,点击re-setup即可,期间不要关闭这2个软件")
+Logger.info("至此已经完成所有步骤,如果你是MCreator用户,请重新启动MCreator,等待构建成功...如果失败,点击re-setup多试几遍,期间不要关闭Shadowsockes和proxifier")
 input()
