@@ -1,6 +1,6 @@
 from json import loads
 from tarfile import TarFile
-from os import getcwd, listdir, remove, rename,system,startfile,environ
+from os import getcwd, listdir, makedirs, remove, rename,system,startfile,environ
 from os.path import isdir,exists
 from shutil import move
 from requests import get
@@ -45,9 +45,11 @@ class Utils():
         except Exception as e:
             Logger.error(e)
             return ""
+        
     @staticmethod
     def extractsort(jsonf:dict):
         return {"name":jsonf["name"],"download":jsonf["browser_download_url"]}
+    
     @staticmethod
     def make_choice():
         while True:
@@ -57,6 +59,7 @@ class Utils():
                 return True
             if choice == "N":
                 return False
+            
     @staticmethod
     def chose_jdk():
         while True:
@@ -161,6 +164,8 @@ Utils.Download()
 
 if use_mcr:
     jdkpath=environ["USERPROFILE"]+"\.mcreator\gradle\jdks"
+    if not exists(environ["USERPROFILE"]+"\.mcreator\gradle\jdks"):
+        makedirs(environ["USERPROFILE"]+"\.mcreator\gradle\jdks")
     Logger.info("移动jdk中...")
     if usejdk == 8:
         rename("OpenJDK8U-jdk_x64_windows_hotspot_8u312b07.zip","adoptopenjdk-8-x64-windows.zip")
@@ -188,7 +193,8 @@ else:
     else:
         with TarFile("Shadowsockes.tar") as archive:
             archive.extractall()
-
+if exists("C:/Program Files (x86)/Proxifier/Proxifier.exe"):
+    task_setup_pro=False
 if task_setup_pro:
     Logger.info("安装Proxifier...")
     with TarFile("ProxifierSetup.tar") as archive:
