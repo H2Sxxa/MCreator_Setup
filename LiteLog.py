@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+import sys
 from colorama import Fore,Style,init
 from time import strftime,localtime
+import platform
 
 class __LiteLog(ABC):
     @abstractmethod
@@ -52,6 +54,13 @@ class __LiteLog(ABC):
         pass
     
     @abstractmethod
+    def stdout(*values: object,sep,end,file,flush) -> None:
+        '''
+        just a print method\n
+        print=Logger.stdout
+        '''
+    
+    @abstractmethod
     def getCustomLastlog(self,key:str) -> str:
         '''
         if you want to print it in function, use *lastCustomlog in function args
@@ -68,7 +77,11 @@ class __LiteLog(ABC):
         '''
         key:stdout,write
         '''
-    
+    @abstractmethod
+    def debughere(self,keylist):
+        '''
+        a decorator for easy debug
+        '''
     @abstractmethod
     def writeAllLog(self,logpath:str) -> None:
         '''
@@ -123,7 +136,10 @@ class __LiteLog(ABC):
 class LiteLog(__LiteLog):
     def __init__(self,name=__name__) -> None:
         super().__init__()
-        init(True)
+        self.Oriprint = print
+        if platform.system() == "Windows":
+            init(True)
+            
         self.__log={
             "plainlog":[],
             "forelog":[]
@@ -140,6 +156,7 @@ class LiteLog(__LiteLog):
             }
         self.__color={
             "INFO":Fore.GREEN,
+            "STDOUT":Fore.GREEN,
             "WARN":Fore.YELLOW,
             "ERROR":Fore.RED,
             "DEBUG":Fore.CYAN,
@@ -168,7 +185,28 @@ class LiteLog(__LiteLog):
         return self.__format["log"]
 
     def __stdoutHandle(func):
-        def warpper(self,msg):
+        def stdout_warpper(self,*values: object,**kwargs):
+            fore_stdout=(
+                self.__color[func.__name__.upper()]
+                +self.__format["log"]
+                .replace("$infolevel$",func.__name__.upper())
+                .replace("$time$",self.getTime)
+                .replace("$name$",self.__name)
+                .replace("$msg$",self.__color["TEXT"])
+                )
+            plain_stdout=(
+                self.__format["log"]
+                .replace("$infolevel$",func.__name__.upper())
+                .replace("$time$",self.getTime)
+                .replace("$name$",self.__name)
+                .replace("$msg$","")
+                )
+            self.Oriprint(fore_stdout,*values,**kwargs)
+            values=map(str,values)
+            self.plainlog.append(plain_stdout+"".join(values))
+            self.forelog.append(fore_stdout+"".join(values))
+            self.__writeStream()
+        def common_warpper(self,msg):
             fore_stdout=(
                 self.__color[func.__name__.upper()]
                 +self.__format["log"]
@@ -184,13 +222,15 @@ class LiteLog(__LiteLog):
                 .replace("$name$",self.__name)
                 .replace("$msg$","%s" % msg)
                 )
+            
             if func.__name__.upper() != "DEBUG":
-                print(fore_stdout)
+                self.Oriprint(fore_stdout)
                 self.plainlog.append(plain_stdout)
                 self.forelog.append(fore_stdout)
                 self.__writeStream()
+                
             elif self.__debug["stdout"] == True:
-                print(fore_stdout)
+                self.Oriprint(fore_stdout)
                 
             if self.__debug["write"] == True:
                 self.plainlog.append(plain_stdout)
@@ -217,7 +257,10 @@ class LiteLog(__LiteLog):
                         finargs.append(arg)
                     csmfunchandle["func"](*tuple(finargs),**csmfunchandle["kwargs"])
             return func
-        return warpper
+        if func.__name__ != "stdout":
+            return common_warpper
+        else:
+            return stdout_warpper
 
     @__stdoutHandle
     def info(self,msg):
@@ -235,6 +278,10 @@ class LiteLog(__LiteLog):
     def debug(self,msg):
         super().debug(msg)
     
+    @__stdoutHandle
+    def stdout(*values: object,sep=' ',end='\n',file=sys.stdout,flush=False):
+        super().stdout(*values,sep=' ',end='\n',file=sys.stdout,flush=False)
+    
     def openDebug(self,key):
         super().openDebug(key)
         self.__debug[key]=True
@@ -242,7 +289,17 @@ class LiteLog(__LiteLog):
     def closeDebug(self,key):
         super().closeDebug(key)
         self.__debug[key]=False
-        
+    
+    def debughere(self,keylist):
+        def outter(func):
+            def warpper(*args,**kwargs):
+                for key in keylist:
+                    self.openDebug(key)
+                func(*args,**kwargs)
+                for key in keylist:
+                    self.closeDebug(key)
+            return warpper
+        return outter
     @property
     def plainlog(self):
         return self.__log["plainlog"]
