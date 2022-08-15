@@ -195,6 +195,8 @@ else:
             archive.extractall()
 if exists("C:/Program Files (x86)/Proxifier/Proxifier.exe"):
     task_setup_pro=False
+else:
+    task_setup_pro=True
 if task_setup_pro:
     Logger.info("安装Proxifier...")
     with TarFile("ProxifierSetup.tar") as archive:
