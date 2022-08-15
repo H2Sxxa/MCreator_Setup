@@ -202,9 +202,25 @@ if task_setup_pro:
     with TarFile("ProxifierSetup.tar") as archive:
         archive.extractall()
     system(r"start .\ProxifierSetup.exe /silent")
-    key=winreg.CreateKey(winreg.HKEY_LOCAL_MACHINE,r"SOFTWARE\Initex\Proxifier\License")
-    winreg.SetValueEx(key,"Owner",0,winreg.REG_SZ,"H2Sxxa")
-    winreg.SetValueEx(key,"Key",0,winreg.REG_SZ,"5EZ8G-C3WL5-B56YG-SCXM9-6QZAP")
+    try:
+        key=winreg.CreateKey(winreg.HKEY_LOCAL_MACHINE,r"SOFTWARE\Initex\Proxifier\License")
+        winreg.SetValueEx(key,"Owner",0,winreg.REG_SZ,"H2Sxxa")
+        winreg.SetValueEx(key,"Key",0,winreg.REG_SZ,"5EZ8G-C3WL5-B56YG-SCXM9-6QZAP")
+    except Exception as e:
+        Logger.error(e)
+        Logger.info("尝试仅注册当前用户...")
+        try:
+            key=winreg.CreateKey(winreg.HKEY_CURRENT_USER,r"Software\Initex\Proxifier\License")
+            winreg.SetValueEx(key,"Owner",0,winreg.REG_SZ,"H2Sxxa")
+            winreg.SetValueEx(key,"Key",0,winreg.REG_SZ,"5EZ8G-C3WL5-B56YG-SCXM9-6QZAP")
+        except Exception as e:
+            Logger.error(e)
+            Logger.error("自动注册失败,可能需要管理员权限")
+            Logger.error("你可以尝试手动注册")
+            Logger.error("启动proxifier,如果需要秘钥选择第二个按钮")
+            Logger.error("第一个文本框随便写,第二个文本框输入「5EZ8G-C3WL5-B56YG-SCXM9-6QZAP」,然后选择「All users on this computer (require administrator)」单选框,最后单击「OK」按钮")
+            Logger.error("完成后回车")
+            input()
 Logger.info("启动Proxifier...")
 system("start \"C:/Program Files (x86)/Proxifier/Proxifier.exe\" ./Minecraft.ppx silent-load")
 Logger.info("启动SSR...")
