@@ -7,5 +7,6 @@
     "shadowsocketes":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/Shadowsockes.tar",
     "proxifier":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/ProxifierSetup.tar",
     "github_mcrapi":"https://api.github.com/repos/MCreator/MCreator/releases",
-    "github_proxy":"https://ghproxy.com/"
+    "github_proxy":"https://ghproxy.com/",
+    "script":"http://raw.githubusercontent.com/IAXRetailer/MCreator_Setup/main/script.py"
 }

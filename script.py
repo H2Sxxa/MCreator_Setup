@@ -1,16 +1,20 @@
-from json import loads
-from tarfile import TarFile
-from os import getcwd, listdir, makedirs, remove, rename,system,startfile,environ
-from os.path import isdir,exists
-from shutil import move
-from requests import get
-from requests import packages
-import sys
-import winreg
-import traceback
-import LiteLog
-from colorama import Fore,Style
-Logger=LiteLog.LiteLog(__name__)
+try:
+    from json import loads
+    from tarfile import TarFile
+    from os import getcwd, listdir, makedirs, remove, rename,system,startfile,environ
+    from os.path import isdir,exists
+    from shutil import move
+    from requests import get
+    from requests import packages
+    import sys
+    import winreg
+    import traceback
+    import Remilia
+    from colorama import Fore,Style
+except Exception as e:
+    print(e)
+    input("请前往 [ https://github.com/IAXRetailer/MCreator_Setup ] 更新至最新Release版本,脚本所要求的库当前启动器无法提供")
+Logger=Remilia.LiteLog.LiteLog(__name__)
 Logger.info("手动配置教程位于https://zekerzhayard.gitbook.io/minecraft-forge-gou-jian-kai-fa-huan-jing-wang-luo-dai-li-pei-zhi-jiao-cheng ")
 Logger.info("如果此程序出错请尝试手动配置")
 Logger.info("如果你不知道干什么请优先观看控制台出现的日志,而不是前往提问")
@@ -19,7 +23,6 @@ Logger.warn("注意,运行此程序时请检查Shadowsockes,Proxifier以及MCrea
 class Utils():
     @staticmethod
     def get_release():
-        packages.urllib3.disable_warnings()
         Logger.warn("连接api.github.com可能会出错如果遇到错误可稍后访问,也可以自行下载")
         Logger.info("snp代表快照(snapshot)版本,stb代表稳定(stable)版本")
         try:
