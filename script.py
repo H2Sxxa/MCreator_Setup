@@ -25,21 +25,28 @@ class Utils():
     def get_release():
         Logger.warn("连接api.github.com可能会出错如果遇到错误可稍后访问,也可以自行下载")
         Logger.info("snp代表快照(snapshot)版本,stb代表稳定(stable)版本")
+        Logger.info("mcrc代表MCreator-Chinese(cdc12345/MCreator-Chinese),第三方版本请勿前往官方提issue")
         try:
             stable=[]
             snapshot=[]
+            mcrc=[]
             choicelist={}
             choice=""
             for i in map(Utils.extractsort,loads(get(Utils.getUri("github_mcrapi")+"/latest",verify=False).text)["assets"]):
                 stable.append(i)
             for i in map(Utils.extractsort,loads(get(Utils.getUri("github_mcrapi"),verify=False).text)[0]["assets"]):
                 snapshot.append(i)
+            for i in map(Utils.extractsort,loads(get("https://api.github.com/repos/cdc12345/MCreator-Chinese/releases/latest",verify=False).text)["assets"]):
+                mcrc.append(i)
             for i,j in zip(stable,range(len(stable))):
                 print(Fore.LIGHTRED_EX+"stb%s"%j+" "+Fore.LIGHTGREEN_EX+i["name"]+Style.RESET_ALL)
                 choicelist.update({"stb%s"%j:i["download"]})
             for i,j in zip(snapshot,range(len(snapshot))):
                 print(Fore.LIGHTRED_EX+"snp%s"%j+" "+Fore.LIGHTGREEN_EX+i["name"]+Style.RESET_ALL)
                 choicelist.update({"snp%s"%j:i["download"]})
+            for i,j in zip(mcrc,range(len(mcrc))):
+                print(Fore.LIGHTRED_EX+"mcrc%s"%j+" "+Fore.LIGHTGREEN_EX+i["name"]+Style.RESET_ALL)
+                choicelist.update({"mcrc%s"%j:i["download"]})
             while choice not in choicelist:
                 Logger.info("选择你需要的版本,然后输入前面的序号,例如stb1")
                 Logger.info("如果你不知道下载哪个,请选择.exe结尾的版本")

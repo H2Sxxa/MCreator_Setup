@@ -5,4 +5,4 @@ DownloadList.txt
 build
 dist
 *.ico
-main.spec
+*.spec
