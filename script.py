@@ -162,7 +162,7 @@ if "Minecraft.ppx" not in rootFiles:
 with open("Cache/download.txt","w",encoding="utf-8") as dld:
     dld.write("\n".join(downloadUrls))
 
-system("./aria2c.exe -x16 -s4 -iCache/download.txt")
+system(r".\aria2c.exe -x16 -s4 -iCache/download.txt")
 
 if usemcr:
     jdkpath=environ["USERPROFILE"]+"\.mcreator\gradle\jdks"
@@ -184,7 +184,7 @@ if usemcr:
 
 if needinstalldnf:
     Logger.info("开始安装.NET 4.8...")
-    system("./ndp48-x86-x64-allos-enu.exe /q /norestart")
+    system(r".\ndp48-x86-x64-allos-enu.exe /q /norestart")
     Logger.info("安装完成")
 
 if task_setup_ssr:
