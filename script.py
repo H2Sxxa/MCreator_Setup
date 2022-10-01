@@ -83,7 +83,7 @@ def get_release():
         return result
     except Exception as e:
         Logger.error(e)
-        global MakeChoice
+        global MakeChoice,get_release
         if MakeChoice("拉取失败是否重试"):
             return get_release()
         else:
