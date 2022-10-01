@@ -15,7 +15,8 @@ from colorama import Fore,Style
 
 rootFiles=listdir()
 Logger=Remilia.LiteLog.LiteLog(__name__)
-
+Logger.info("手动配置教程位于https://zekerzhayard.gitbook.io/minecraft-forge-gou-jian-kai-fa-huan-jing-wang-luo-dai-li-pei-zhi-jiao-cheng ")
+Logger.info("如果此程序出错请尝试手动配置")
 InfoDict={
     "jdk8":"https://ghproxy.com/https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u312-b07/OpenJDK8U-jdk_x64_windows_hotspot_8u312b07.zip",
     "jdk16":"https://ghproxy.com/https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip",
@@ -120,6 +121,8 @@ if PlatformCheck().need_netframework():
     needinstalldnf=True
     Logger.info("注册表内没有发现.NET 4.8")
     Logger.info("已将.NET Framework 4.8加入下载列表")
+else:
+    needinstalldnf=False
     
 ErrorHooker()
 if MakeChoice("您是否为MCreator用户"):

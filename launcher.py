@@ -32,7 +32,7 @@ InfoDict={
     "aria":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/aria2c.exe"
 }
 
-if "aria2c" not in rootFiles:
+if "aria2c.exe" not in rootFiles:
     Logger.info("缺乏组件 [ aria2c ] ,开始下载...")
     with open("aria2c.exe","wb") as f:
         try:
