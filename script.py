@@ -1,97 +1,104 @@
-try:
-    from json import loads
-    from tarfile import TarFile
-    from os import getcwd, listdir, makedirs, remove, rename,system,startfile,environ
-    from os.path import isdir,exists
-    from shutil import move
-    from requests import get
-    from requests import packages
-    import sys
-    import winreg
-    import traceback
-    import Remilia
-    from colorama import Fore,Style
-except Exception as e:
-    print(e)
-    input("请前往 [ https://github.com/IAXRetailer/MCreator_Setup ] 更新至最新Release版本,脚本所要求的库当前启动器无法提供")
+from json import loads
+from tarfile import TarFile
+from os import getcwd, listdir, makedirs, mkdir, remove, rename,system,startfile,environ
+from os.path import isdir,exists
+from shutil import move
+from urllib import request
+from requests import get
+from requests import packages
+import sys
+import winreg
+import traceback
+import Remilia
+from cli_support import prompts,utils
+from colorama import Fore,Style
+
+rootFiles=listdir()
 Logger=Remilia.LiteLog.LiteLog(__name__)
-Logger.info("手动配置教程位于https://zekerzhayard.gitbook.io/minecraft-forge-gou-jian-kai-fa-huan-jing-wang-luo-dai-li-pei-zhi-jiao-cheng ")
-Logger.info("如果此程序出错请尝试手动配置")
-Logger.info("如果你不知道干什么请优先观看控制台出现的日志,而不是前往提问")
-Logger.warn("注意,运行此程序时请检查Shadowsockes,Proxifier以及MCreator是否关闭,以免带来一些不必要的麻烦")
 
-class Utils():
-    @staticmethod
-    def get_release():
-        Logger.warn("连接api.github.com可能会出错如果遇到错误可稍后访问,也可以自行下载")
-        Logger.info("snp代表快照(snapshot)版本,stb代表稳定(stable)版本")
-        Logger.info("mcrc代表MCreator-Chinese(cdc12345/MCreator-Chinese),第三方版本请勿前往官方提issue")
-        try:
-            stable=[]
-            snapshot=[]
-            mcrc=[]
-            choicelist={}
-            choice=""
-            for i in map(Utils.extractsort,loads(get(Utils.getUri("github_mcrapi")+"/latest",verify=False).text)["assets"]):
-                stable.append(i)
-            for i in map(Utils.extractsort,loads(get(Utils.getUri("github_mcrapi"),verify=False).text)[0]["assets"]):
-                snapshot.append(i)
-            for i in map(Utils.extractsort,loads(get("https://api.github.com/repos/cdc12345/MCreator-Chinese/releases/latest",verify=False).text)["assets"]):
-                mcrc.append(i)
-            for i,j in zip(stable,range(len(stable))):
-                print(Fore.LIGHTRED_EX+"stb%s"%j+" "+Fore.LIGHTGREEN_EX+i["name"]+Style.RESET_ALL)
-                choicelist.update({"stb%s"%j:i["download"]})
-            for i,j in zip(snapshot,range(len(snapshot))):
-                print(Fore.LIGHTRED_EX+"snp%s"%j+" "+Fore.LIGHTGREEN_EX+i["name"]+Style.RESET_ALL)
-                choicelist.update({"snp%s"%j:i["download"]})
-            for i,j in zip(mcrc,range(len(mcrc))):
-                print(Fore.LIGHTRED_EX+"mcrc%s"%j+" "+Fore.LIGHTGREEN_EX+i["name"]+Style.RESET_ALL)
-                choicelist.update({"mcrc%s"%j:i["download"]})
-            while choice not in choicelist:
-                Logger.info("选择你需要的版本,然后输入前面的序号,例如stb1")
-                Logger.info("如果你不知道下载哪个,请选择.exe结尾的版本")
-                choice=input()
-            return Utils.getUri("github_proxy")+choicelist[choice]
-        except Exception as e:
-            Logger.error(e)
-            return ""
-        
-    @staticmethod
-    def extractsort(jsonf:dict):
-        return {"name":jsonf["name"],"download":jsonf["browser_download_url"]}
+InfoDict={
+    "jdk8":"https://ghproxy.com/https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u312-b07/OpenJDK8U-jdk_x64_windows_hotspot_8u312b07.zip",
+    "jdk16":"https://ghproxy.com/https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip",
+    "jdk17":"https://ghproxy.com/https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip",
+    "dnf":"https://download.visualstudio.microsoft.com/download/pr/2d6bb6b2-226a-4baa-bdec-798822606ff1/8494001c276a4b96804cde7829c04d7f/ndp48-x86-x64-allos-enu.exe",
+    "shadowsocketes":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/Shadowsockes.tar",
+    "proxifier":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/ProxifierSetup.tar",
+    "proxifierConfig":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/Minecraft.ppx",
+    "github_mcrapi":"https://api.github.com/repos/MCreator/MCreator/releases",
+    "github_proxy":"https://ghproxy.com/",
+    "script":"https://ghproxy.com/https://raw.githubusercontent.com/IAXRetailer/MCreator_Setup/main/script.py"
+}
+
+
+
+BrightStyle=prompts.Style.from_dict({
+        "questionmark": "ansibrightred bold",
+        "question": "ansibrightgreen",
+        "sign": "",
+        "unsign": "",
+        "selected": "",
+        "pointer": "bold",
+        "annotation": "bold",
+        "answer": "bold",
+})
+
+
+ListPromptAnce="（使用 ↑ 和 ↓ 选择，ENTER 确认）"
+CheckBoxPromptAnce="（使用 ↑ 和 ↓ 选择，SPACE 选中，ENTER 确认）"
+downloadUrls=[]
+
+def MakeChoice(question=""):
+    global prompts,ListPromptAnce,BrightStyle
+    return prompts.ListPrompt(
+        question=question,
+        choices=[
+            prompts.Choice("是",True),
+            prompts.Choice("否",False)
+                ],
+        annotation=ListPromptAnce,
+        ).prompt(style=BrightStyle).data
+
+def MakeCheck(question="",choices=[]):
+    global prompts,CheckBoxPromptAnce,BrightStyle
+    return prompts.CheckboxPrompt(
+        question=question,
+        choices=choices,
+        annotation=CheckBoxPromptAnce,
+        ).prompt(style=BrightStyle)
+
+def check_jdkpath(jdkpath,name):
+    if name in listdir(jdkpath):
+        remove(jdkpath+"/"+name)
+
+def get_release():
+    result=[]
+    try:
+        for i in loads(get(InfoDict["github_mcrapi"]+"/latest",verify=False).text)["assets"]:
+            result.append(prompts.Choice(name="%s(稳定版)"%i["name"],data=InfoDict["github_proxy"]+i["browser_download_url"]))
+        for i in loads(get(InfoDict["github_mcrapi"],verify=False).text)[0]["assets"]:
+            result.append(prompts.Choice(name="%s(快照版)"%i["name"],data=InfoDict["github_proxy"]+i["browser_download_url"]))
+        for i in loads(get("https://api.github.com/repos/cdc12345/MCreator-Chinese/releases/latest",verify=False).text)["assets"]:
+            result.append(prompts.Choice(name="%s(中文版(cdc12345/MCreator-Chinese))"%i["name"],data=InfoDict["github_proxy"]+i["browser_download_url"]))
+        return result
+    except Exception as e:
+        Logger.error(e)
+        if MakeChoice("拉取失败是否重试"):
+            return get_release()
+        else:
+            return [prompts.Choice(name="拉取失败,跳过并自行下载",data="")]
     
-    @staticmethod
-    def make_choice():
-        while True:
-            Logger.info("是否确定(Y/N)")
-            choice=input().upper()
-            if choice == "Y":
-                return True
-            if choice == "N":
+class PlatformCheck():
+    def __init__(self) -> None:
+        Logger.info("检查注册表中...")
+    def need_netframework(self):
+        try:
+            if "4.8" in winreg.QueryValueEx(winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,r"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full"),"Version")[0]:
                 return False
-            
-    @staticmethod
-    def chose_jdk():
-        while True:
-            Logger.info("从中选择一个JDK版本")
-            Logger.info(Utils.getUri("jdk"))
-            choice = input().lower()
-            if choice in Utils.getUri("jdk"):
-                return Utils.getUri(choice)
-            
-    @staticmethod
-    def getUri(key):
-        with open("download.json","r",encoding="utf-8") as f:
-            return loads(f.read())[key]
-
-    @staticmethod
-    def Download():
-        system(r".\aria2c.exe -x16 -s4 -iDownloadList.txt")
-
-    @staticmethod
-    def check_jdkpath(jdkpath,name):
-        if name in listdir(jdkpath):
-            remove(jdkpath+"/"+name)
+            else:
+                return True
+        except:
+            return True
+        
 class ErrorHooker:
     def __init__(self) -> None:
         sys.excepthook = self.Hooker
@@ -102,96 +109,75 @@ class ErrorHooker:
         Logger.error(exc_type)
         Logger.error(exc_value)
         Logger.error("Exception location\n"+"".join(traceback.format_exception(exc_type, exc_value, exc_traceback_obj)))
-        Logger.writeAllLog("crashreport.log")
-        Logger.error("错误日志已保存到crashreport.log")
-        Logger.info("如果你看不懂这个崩溃报告可以前往 https://github.com/IAXRetailer/MCreator_Setup/issues 点击「New issue」")
+        Logger.writeAllLog("Cache/Logs/script.log")
+        Logger.error("错误日志已保存到Cache/Logs/script.log")
+        Logger.info("如果你看不懂这个崩溃报告可以前往 https://github.com/IAXRetailer/MCreator_Setup/issues 点击「New issue」提交此日志")
         input()
         exit()
-
-class PlatformCheck():
-    def __init__(self) -> None:
-        Logger.info("检查注册表中...")
-    def need_netframework(self):
-        try:
-            if "4.8" in winreg.QueryValueEx(winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,r"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full"),"Version")[0]:
-                return False
-        except:
-            return True
+        
+if PlatformCheck().need_netframework():
+    downloadUrls.append(InfoDict["dnf"])
+    needinstalldnf=True
+    Logger.info("注册表内没有发现.NET 4.8")
+    Logger.info("已将.NET Framework 4.8加入下载列表")
+    
 ErrorHooker()
-with open("DownloadList.txt","w",encoding="utf-8") as DownloadList:
-    Logger.info("您是否为MCreator用户")
-    Logger.info("如果已经下好JDK并且下好MCreator可以输入N跳过此步")
-    LocationFile=listdir()
-    task_setup_pro=False
-    task_setup_ssr=False
-    use_mcr=False
-    if Utils.make_choice():
-        use_mcr=True
-        Logger.info("选择jdk版本")
-        Logger.info("jdk8 适用于 Minecraft 1.16.5 或更旧版本")
-        Logger.info("jdk16 适用于 Minecraft 1.17.x")
-        Logger.info("jdk17 适用于 Minecraft 1.18 或更新版本")
-        Ijdk=Utils.chose_jdk()
-        if Ijdk == Utils.getUri("jdk8"):
-            usejdk=8
-            if "OpenJDK8U-jdk_x64_windows_hotspot_8u312b07.zip" not in LocationFile:
-                DownloadList.write(Ijdk+"\n")
-                
-        if Ijdk == Utils.getUri("jdk16"):
-            usejdk=16
-            if "OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip" not in LocationFile:
-                DownloadList.write(Ijdk+"\n")
-                
-        if Ijdk == Utils.getUri("jdk17"):
-            usejdk=17
-            if "OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip" not in LocationFile:
-                DownloadList.write(Ijdk+"\n")
-                
-        Logger.info("是否需要同时下载MCreator")
-        Logger.info("已安装或者下载好了可以输入N跳过此步")
-        if Utils.make_choice():
-            DownloadList.write(Utils.get_release()+"\n")
-            Logger.info("MCreator下载后会存放到%s,请自行安装" % getcwd())
-            
-    if "ProxifierSetup.tar" not in LocationFile:
-        task_setup_pro=True
-        DownloadList.write(Utils.getUri("proxifier")+"\n")
-        
-    if "Shadowsockes.tar" not in LocationFile:
-        task_setup_ssr=True
-        DownloadList.write(Utils.getUri("shadowsocketes")+"\n")
-        
-    Platformck=PlatformCheck()
-    if Platformck.need_netframework():
-        task_setup_dnf=False
-        Logger.info("注册表内没有发现.NET 4.8")
-        Logger.info("已将.NET Framework 4.8加入下载列表")
-        task_setup_dnf=True
-        DownloadList.write(Utils.getUri("dnf")+"\n")
-    else:
-        task_setup_dnf=False
-Utils.Download()
+if MakeChoice("您是否为MCreator用户"):
+    usemcr=True
+    usejdk=MakeCheck(
+        question="使用哪几种JDK",
+        choices=[                            
+            prompts.Choice("JDK8（适用于 Minecraft 1.16.5 或更旧版本）",InfoDict["jdk8"]),
+            prompts.Choice("JDK16（适用于 Minecraft 1.17.x）",InfoDict["jdk16"]),
+            prompts.Choice("JDK17（适用于 Minecraft 1.18 或更新版本）",InfoDict["jdk17"])
+                ]
+        )
+    jdks=[_.data for _ in usejdk]
+    
+    if MakeChoice("是否下载MCreator"):
+        downloadUrls.extend([_.data for _ in MakeCheck(question="下载哪几种MCreator(下载到本目录后需自行安装)",choices=get_release())])
+    
+    downloadUrls.extend(jdks)
+else:
+    usemcr=False
 
-if use_mcr:
+if "ProxifierSetup.tar" not in rootFiles:
+    downloadUrls.append(InfoDict["proxifier"])
+    
+if "Shadowsockes.tar" not in rootFiles and not exists("Shadowsockes"):
+    task_setup_ssr=True
+    downloadUrls.append(InfoDict["shadowsocketes"])
+
+if "Minecraft.ppx" not in rootFiles:
+    downloadUrls.append(InfoDict["proxifierConfig"])
+
+with open("Cache/download.txt","w",encoding="utf-8") as dld:
+    dld.write("\n".join(downloadUrls))
+
+system(r".\aria2c.exe -x16 -s4 -iCache/download.txt")
+
+if usemcr:
     jdkpath=environ["USERPROFILE"]+"\.mcreator\gradle\jdks"
     if not exists(environ["USERPROFILE"]+"\.mcreator\gradle\jdks"):
         makedirs(environ["USERPROFILE"]+"\.mcreator\gradle\jdks")
     Logger.info("移动jdk中...")
-    if usejdk == 8:
+    if InfoDict["jdk8"] in jdks:
         rename("OpenJDK8U-jdk_x64_windows_hotspot_8u312b07.zip","adoptopenjdk-8-x64-windows.zip")
-        Utils.check_jdkpath(jdkpath,"adoptopenjdk-8-x64-windows.zip")
+        check_jdkpath(jdkpath,"adoptopenjdk-8-x64-windows.zip")
         move("adoptopenjdk-8-x64-windows.zip",jdkpath)
-    if usejdk == 16:
+    if InfoDict["jdk16"] in jdks:
         rename("OpenJDK16U-jdk_x64_windows_hotspot_16.0.2_7.zip","adoptopenjdk-16-x64-windows.zip")
-        Utils.check_jdkpath(jdkpath,"adoptopenjdk-16-x64-windows.zip")
+        check_jdkpath(jdkpath,"adoptopenjdk-16-x64-windows.zip")
         move("adoptopenjdk-16-x64-windows.zip",jdkpath)
-    if usejdk == 17:
+    if InfoDict["jdk17"] in jdks:
         rename("OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip","adoptopenjdk-17-x64-windows.zip")
-        Utils.check_jdkpath(jdkpath,"adoptopenjdk-17-x64-windows.zip")
+        check_jdkpath(jdkpath,"adoptopenjdk-17-x64-windows.zip")
         move("adoptopenjdk-17-x64-windows.zip",jdkpath)
 
-if task_setup_dnf:
+if needinstalldnf:
+    Logger.info("开始安装.NET 4.8...")
     system(r".\ndp48-x86-x64-allos-enu.exe /q /norestart")
+    Logger.info("安装完成")
 
 if task_setup_ssr:
     Logger.info("安装SSR...")
@@ -203,14 +189,18 @@ else:
     else:
         with TarFile("Shadowsockes.tar") as archive:
             archive.extractall()
+
+
+
 if exists("C:/Program Files (x86)/Proxifier/Proxifier.exe"):
     task_setup_pro=False
 else:
     task_setup_pro=True
 if task_setup_pro:
     Logger.info("安装Proxifier...")
-    with TarFile("ProxifierSetup.tar") as archive:
-        archive.extractall()
+    if "ProxifierSetup.exe" not in rootFiles:
+        with TarFile("ProxifierSetup.tar") as archive:
+            archive.extractall()
     system(r"start .\ProxifierSetup.exe /silent")
     try:
         key=winreg.CreateKey(winreg.HKEY_LOCAL_MACHINE,r"SOFTWARE\Initex\Proxifier\License")
@@ -231,6 +221,7 @@ if task_setup_pro:
             Logger.error("第一个文本框随便写,第二个文本框输入「5EZ8G-C3WL5-B56YG-SCXM9-6QZAP」,然后选择「All users on this computer (require administrator)」单选框,最后单击「OK」按钮")
             Logger.error("完成后回车")
             input()
+            
 Logger.info("启动Proxifier...")
 system("start \"C:/Program Files (x86)/Proxifier/Proxifier.exe\" ./Minecraft.ppx silent-load")
 Logger.info("启动SSR...")

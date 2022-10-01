@@ -6,3 +6,4 @@ build
 dist
 *.ico
 *.spec
+Cache
