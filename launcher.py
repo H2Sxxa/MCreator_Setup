@@ -28,10 +28,20 @@ InfoDict={
     "proxifierConfig":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/Minecraft.ppx",
     "github_mcrapi":"https://api.github.com/repos/MCreator/MCreator/releases",
     "github_proxy":"https://ghproxy.com/",
-    "script":"https://ghproxy.com/https://raw.githubusercontent.com/IAXRetailer/MCreator_Setup/main/script.py"
+    "script":"https://ghproxy.com/https://raw.githubusercontent.com/IAXRetailer/MCreator_Setup/main/script.py",
+    "aria":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/aria2c.exe"
 }
 
-
+if "aria2c" not in rootFiles:
+    Logger.info("缺乏组件 [ aria2c ] ,开始下载...")
+    with open("aria2c.exe","wb") as f:
+        try:
+            f.write(get(InfoDict["aria"],verify=False).content)
+        except Exception as e:
+            traceback.print_exc()
+            Logger.error("下载失败,可以选择前往 [ %s ] 自行下载到本目录后重新启动" % InfoDict["aria"])
+            input()
+            exit()
 if len(Argv) > 1:
     StartFile=Argv[1]
 else:
