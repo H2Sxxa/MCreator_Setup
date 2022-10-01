@@ -150,6 +150,11 @@ if "ProxifierSetup.tar" not in rootFiles:
 if "Shadowsockes.tar" not in rootFiles and not exists("Shadowsockes"):
     task_setup_ssr=True
     downloadUrls.append(InfoDict["shadowsocketes"])
+else:
+    if not exists("Shadowsockes"):
+        task_setup_ssr=True
+    else:
+        task_setup_ssr=False
 
 if "Minecraft.ppx" not in rootFiles:
     downloadUrls.append(InfoDict["proxifierConfig"])
@@ -157,7 +162,7 @@ if "Minecraft.ppx" not in rootFiles:
 with open("Cache/download.txt","w",encoding="utf-8") as dld:
     dld.write("\n".join(downloadUrls))
 
-system(r".\aria2c.exe -x16 -s4 -iCache/download.txt")
+system("./aria2c.exe -x16 -s4 -iCache/download.txt")
 
 if usemcr:
     jdkpath=environ["USERPROFILE"]+"\.mcreator\gradle\jdks"
@@ -179,7 +184,7 @@ if usemcr:
 
 if needinstalldnf:
     Logger.info("开始安装.NET 4.8...")
-    system(r".\ndp48-x86-x64-allos-enu.exe /q /norestart")
+    system("./ndp48-x86-x64-allos-enu.exe /q /norestart")
     Logger.info("安装完成")
 
 if task_setup_ssr:
