@@ -78,8 +78,8 @@ def get_release():
             result.append(prompts.Choice(name="%s(稳定版)"%i["name"],data=InfoDict["github_proxy"]+i["browser_download_url"]))
         for i in loads(get(InfoDict["github_mcrapi"],verify=False).text)[0]["assets"]:
             result.append(prompts.Choice(name="%s(快照版)"%i["name"],data=InfoDict["github_proxy"]+i["browser_download_url"]))
-        for i in loads(get("https://api.github.com/repos/cdc12345/MCreator-Chinese/releases/latest",verify=False).text)["assets"]:
-            result.append(prompts.Choice(name="%s(中文版(cdc12345/MCreator-Chinese))"%i["name"],data=InfoDict["github_proxy"]+i["browser_download_url"]))
+        '''for i in loads(get("https://api.github.com/repos/cdc12345/MCreator-Chinese/releases/latest",verify=False).text)["assets"]:
+            result.append(prompts.Choice(name="%s(中文版(cdc12345/MCreator-Chinese))"%i["name"],data=InfoDict["github_proxy"]+i["browser_download_url"]))'''
         return result
     except Exception as e:
         Logger.error(e)
