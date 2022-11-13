@@ -73,12 +73,21 @@ def check_jdkpath(jdkpath,name):
 
 def get_release():
     result=[]
+    def connectAPItoget(url:str) -> str:
+        try:
+            res=get(url=url,verify=False).text
+            if "Not Found" in res:
+                Logger.warn(f"拉取仓库 {url} 时发生错误，将从选择列表移除")
+                return r'{"assets":[]}'
+            return res
+        except:
+            return r'{"assets":[]}'
     try:
-        for i in loads(get(InfoDict["github_mcrapi"]+"/latest",verify=False).text)["assets"]:
+        for i in loads(connectAPItoget(InfoDict["github_mcrapi"]+"/latest"))["assets"]:
             result.append(prompts.Choice(name="%s(稳定版)"%i["name"],data=InfoDict["github_proxy"]+i["browser_download_url"]))
-        for i in loads(get(InfoDict["github_mcrapi"],verify=False).text)[0]["assets"]:
+        for i in loads(connectAPItoget(InfoDict["github_mcrapi"]))[0]["assets"]:
             result.append(prompts.Choice(name="%s(快照版)"%i["name"],data=InfoDict["github_proxy"]+i["browser_download_url"]))
-        for i in loads(get("https://api.github.com/repos/cdc12345/MCreator-Chinese/releases/latest",verify=False).text)["assets"]:
+        for i in loads(connectAPItoget("https://api.github.com/repos/cdc12345/MCreator-Chinese/releases/latest"))["assets"]:
             result.append(prompts.Choice(name="%s(中文版(cdc12345/MCreator-Chinese))"%i["name"],data=InfoDict["github_proxy"]+i["browser_download_url"]))
         return result
     except Exception as e:
