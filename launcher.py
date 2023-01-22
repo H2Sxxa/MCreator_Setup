@@ -10,11 +10,11 @@ import sys
 import winreg
 import traceback
 import Remilia
-import cli_support
+from Remilia.utils.cli import prompts,utils
 from colorama import Fore,Style
 
 packages.urllib3.disable_warnings()
-Logger=Remilia.LiteLog.LiteLog("Launcher")
+Logger=Remilia.lite.LiteLog.Logger(__name__,style=Remilia.lite.LiteLog.DefaultStyle.default_LogStyle1)
 rootFiles=listdir()
 Argv=sys.argv
 
@@ -28,7 +28,7 @@ InfoDict={
     "proxifierConfig":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/Minecraft.ppx",
     "github_mcrapi":"https://api.github.com/repos/MCreator/MCreator/releases",
     "github_proxy":"https://ghproxy.com/",
-    "script":"https://ghproxy.com/https://raw.githubusercontent.com/IAXRetailer/MCreator_Setup/main/script.py",
+    "script":"https://ghproxy.com/https://raw.githubusercontent.com/IAXRetailer/MCreator_Setup/main/script_new.py",
     "aria":"https://ghproxy.com/https://github.com/IAXRetailer/MCreator_Setup/blob/main/aria2c.exe"
 }
 
@@ -79,8 +79,8 @@ if exists(StartFile):
         scriptText=string.read()
 else:
     scriptUri=InfoDict["script"]
-    Logger.info("从 [ %s ] 拉取 [ script.py ] 并启动..." % scriptUri)
-    Logger.info("如果下载失败可以前往上述网址下载文件,然后移动到本目录下重命名为 [ script.py ] ,最后重启此程序")
+    Logger.info("从 [ %s ] 拉取 [ script_new.py ] 并启动..." % scriptUri)
+    Logger.info("如果下载失败可以前往上述网址下载文件,然后移动到本目录下重命名为 [ script_new.py ] ,最后重启此程序")
     try:
         resp=get(scriptUri,verify=False)
         scriptText=resp.text
