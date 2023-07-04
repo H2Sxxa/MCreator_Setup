@@ -1,3 +1,5 @@
+# Not to maintain anymore，use https://github.com/H2Sxxa/Rosa
+
 # MCreator_Setup
 A fast tool for special user(not offical)
 
